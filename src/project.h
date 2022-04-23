@@ -3,24 +3,24 @@
 
 typedef struct {
     char* name;
+    unsigned int damage;
+} Weapon;
+
+typedef struct {
+    char* name;
     unsigned int hp;
     unsigned int exp;
     Weapon* weapon;
 } Character;
 
-typedef struct {
-    char* name;
-    unsigned int damage;
-} Weapon;
-
-Character* character_list;
-unsigned int nof_characters;
+Character** character_list;
+int nof_characters;
 
 //user commands
-int add_character(const char* name, unsigned int hp, const char* weapon_name, unsigned int weapon_damage); //init with 0 exp
+int add_character(const char* name, int hp, int exp, const char* weapon_name, int weapon_damage); //init with 0 exp
 int attack_names(const char* attacker_name, const char* target_name);
 int attack(Character* attacker, Character* target);
-void print_characters(void);
+int print_characters(void);
 int save(const char* filename);
 int load(const char* filename);
 
