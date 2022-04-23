@@ -3,8 +3,6 @@
 #include "stdio.h"
 #include "string.h"
 
-// TODO:: implement your project here!
-
 
 int main(void) {
 
@@ -24,6 +22,7 @@ int add_character(const char* name, unsigned int hp, const char* weapon_name, un
             char* check_name = check_character.name;
 
             if (strcmp(name, check_name) == 0) {
+                printf("ERROR: character already exists\n");
                 return -1;
             }
         }
@@ -33,13 +32,18 @@ int add_character(const char* name, unsigned int hp, const char* weapon_name, un
     }
 
     Character* new_character = malloc(sizeof(Character));
-    if (!new_character) return -1;
+    if (!new_character) {
+        printf("ERROR: failed to allocate memory for character\n");
+        return -1;
+    }
 
     char* new_name = malloc(sizeof(char) * strlen(name+1));
     if (!new_name) {
         free(new_character);
+        printf("ERROR: failed to allocate memory for character\n");
         return -1;
     }
+
     new_name = strcpy(new_name, name);
     new_character -> name = new_name;
     new_character -> hp = hp;
@@ -49,6 +53,7 @@ int add_character(const char* name, unsigned int hp, const char* weapon_name, un
     if (!new_weapon) {
         free(new_name);
         free(new_character);
+        printf("ERROR: failed to allocate memory for character\n");
         return -1;
     }
 
@@ -57,6 +62,7 @@ int add_character(const char* name, unsigned int hp, const char* weapon_name, un
         free(new_name);
         free(new_character);
         free(new_weapon);
+        printf("ERROR: failed to allocate memory for character\n");
         return -1;
     }
 
@@ -90,7 +96,10 @@ int attack_names(const char* attacker_name, const char* target_name) {
             target = character;
         }
     }
-    if (!target_found || !attacker_found) return -1;
+    if (!target_found || !attacker_found) {
+        printf("ERROR: character(s) not found\n");
+        return -1;
+    }
 
     return attack(&attacker, &target);
 }
@@ -106,6 +115,11 @@ int attack(Character* attacker, Character* target) {
 
     attacker -> exp += damage;
     target -> hp -= damage;
+
+    printf("%s attacked %s with %s by %d damage.\n", attacker -> name, target -> name, attacker_weapon.name, damage);
+    printf("%s has %d hit points remaining.\n", target -> name, target -> hp);
+    printf("%s gained %d experience points.\n", attacker -> name, damage);
+    printf("SUCCESS\n");
 
     return 1;
 }
@@ -137,4 +151,81 @@ void print_characters() {
         printf("%s %d %d %s %d", character.name, character.hp, character.exp, weapon.name, weapon.damage);
         printf("\n");
     }
+}
+
+int save(const char* filename) {
+
+    FILE* file = fopen(filename, "w");
+    if (!file) {
+        printf("ERROR: couldn't open file\n");
+        return -1;
+    }
+
+    // printing format:
+    // <name> <hit-points> <experience> <weapon-name> <weapon-damage>
+    for (int i = 0; i < nof_characters; i++) {
+        Character character = character_list[i];
+        Weapon weapon = *(character.weapon);
+
+        int res = fprintf(file, "%s %d %d %s %d\n", character.name, character.hp, character.exp, weapon.name, weapon.damage);
+        if (res < 0) {
+            printf("ERROR: writing to file failed\n");
+            fclose(file);
+            return -1;
+        }
+    }
+
+    fclose(file);
+    return 1;
+}
+
+int load(const char* filename) {
+    FILE* file = fopen(filename, "w");
+    if (!file) {
+        printf("ERROR: couldn't open file\n");
+        return -1;
+    }
+
+    delete_characters();
+
+    // file data format:
+    // <name> <hit-points> <experience> <weapon-name> <weapon-damage> (newline)
+    char name_buffer[1000];
+    char weapon_name_buffer[1000];
+    unsigned int hp;
+    unsigned int exp;
+    unsigned int damage;
+
+    int res = fscanf(file, "%s %d %d %s %d\n", name_buffer, hp, exp, weapon_name_buffer, damage);
+    while (res != EOF) {
+        if (ferror(file)) {
+            printf("ERROR: loading from file failed");
+            fclose(file);
+            return -1;
+        }
+        add_character(name_buffer, hp, weapon_name_buffer, damage);
+        res = fscanf(file, "%s %d %d %s %d\n", name_buffer, hp, exp, weapon_name_buffer, damage);
+    }
+    
+
+    fclose(file);
+    return 1;
+}
+
+void delete_characters() {
+
+    for (int i = 0; i < nof_characters; i++) {
+        Character character = character_list[i];
+        char* character_name = character.name;
+        Weapon* weapon = character.weapon;
+        char* weapon_name = weapon -> name;
+
+        free(weapon_name);
+        free(weapon);
+        free(character_name);
+        free(&character);
+    }
+
+    free(character_list);
+    nof_characters = 0;
 }
