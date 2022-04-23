@@ -43,6 +43,7 @@ int add_character(const char* name, unsigned int hp, const char* weapon_name, un
     new_name = strcpy(new_name, name);
     new_character -> name = new_name;
     new_character -> hp = hp;
+    new_character -> exp = 0;
 
     Weapon* new_weapon = malloc(sizeof(Weapon));
     if (!new_weapon) {
@@ -67,6 +68,44 @@ int add_character(const char* name, unsigned int hp, const char* weapon_name, un
 
     character_list[nof_characters] = *new_character;
     nof_characters++;
+
+    return 1;
+}
+
+int attack_names(const char* attacker_name, const char* target_name) {
+
+    int attacker_found = 0;
+    int target_found = 0;
+    Character attacker;
+    Character target;
+
+    for (int i = 0; i < nof_characters; i++) {
+        Character character = character_list[i];
+        if (!attacker_found && (strcmp(attacker_name, character.name) == 0)) {
+            attacker_found = 1;
+            attacker = character;
+        }
+        if (!target_found && (strcmp(target_name, character.name) == 0)) {
+            target_found = 1;
+            target = character;
+        }
+    }
+    if (!target_found || !attacker_found) return -1;
+
+    return attack(&attacker, &target);
+}
+
+int attack(Character* attacker, Character* target) {
+
+    Weapon attacker_weapon = *(attacker -> weapon);
+    unsigned int damage = attacker_weapon.damage;
+    unsigned int target_hp = target -> hp;
+    if (target_hp < damage) {
+        damage = target_hp;
+    }
+
+    attacker -> exp += damage;
+    target -> hp -= damage;
 
     return 1;
 }

@@ -18,6 +18,7 @@ unsigned int nof_characters;
 
 //user commands
 int add_character(const char* name, unsigned int hp, const char* weapon_name, unsigned int weapon_damage); //init with 0 exp
+int attack_names(const char* attacker_name, const char* target_name);
 int attack(Character* attacker, Character* target);
 void print_characters(void);
 int save(void);
