@@ -26,6 +26,7 @@ int load(void);
 
 //helper functions
 Character* find_character(const char* name, Character* list_of_characters);
+int compare_for_qsort(const void* a, const void* b);
 
 
 

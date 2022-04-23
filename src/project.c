@@ -109,3 +109,32 @@ int attack(Character* attacker, Character* target) {
 
     return 1;
 }
+
+
+
+int compare_for_qsort(const void* a, const void* b) {
+    Character* a_character = (Character*)a;
+    Character* b_character = (Character*)b;
+
+    unsigned int a_exp = a_character -> exp;
+    unsigned int b_exp = b_character -> exp;
+
+    if (a_exp > b_exp) {
+        return -1;
+    } else {
+        return 1;
+    }
+}
+
+void print_characters() {
+    // format characters, each on their own line:
+    // <name> <hit-points> <experience> <weapon-name> <weapon-damage>
+    qsort(character_list, nof_characters, sizeof(Character), compare_for_qsort);
+
+    for (int i = 0; i < nof_characters; i++) {
+        Character character = character_list[i];
+        Weapon weapon = *(character.weapon);
+        printf("%s %d %d %s %d", character.name, character.hp, character.exp, weapon.name, weapon.damage);
+        printf("\n");
+    }
+}
