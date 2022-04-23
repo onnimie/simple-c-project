@@ -9,6 +9,55 @@ int main(void) {
     character_list;
     nof_characters = 0;
 
+    int playing = 1;
+
+    while (playing) {
+        char command_buffer[1000];
+        char name_buffer_1[1000];
+        char name_buffer_2[1000];
+
+        fgets(command_buffer, 1000, stdin);
+        char command = command_buffer[0];
+
+        switch (command) {
+            case 'A':
+                unsigned int damage;
+                unsigned int hp;
+                sscanf(command_buffer, "A %s %d %s %d\n", name_buffer_1, hp, name_buffer_2, damage);
+                add_character(name_buffer_1, hp, name_buffer_2, damage);
+                break;
+
+            case 'H':
+                sscanf(command_buffer, "H %s %s", name_buffer_1, name_buffer_2);
+                attack_names(name_buffer_1, name_buffer_2);
+                break;
+
+            case 'W':
+                sscanf(command_buffer, "W %s", name_buffer_1);
+                save(name_buffer_1);
+                break;
+
+            case 'O':
+                sscanf(command_buffer, "O %s", name_buffer_1);
+                load(name_buffer_1);
+                break;
+
+            case 'L':
+                print_characters();
+                break;
+
+            case 'Q':
+                playing = 0;
+                delete_characters();
+                break;
+
+            default:
+                printf("ERROR: unknown command\n");
+                //break;
+        }
+    }
+
+
 
     0;
 }
@@ -151,6 +200,7 @@ void print_characters() {
         printf("%s %d %d %s %d", character.name, character.hp, character.exp, weapon.name, weapon.damage);
         printf("\n");
     }
+    printf("SUCCESS\n");
 }
 
 int save(const char* filename) {
@@ -168,7 +218,7 @@ int save(const char* filename) {
         Weapon weapon = *(character.weapon);
 
         int res = fprintf(file, "%s %d %d %s %d\n", character.name, character.hp, character.exp, weapon.name, weapon.damage);
-        if (res < 0) {
+        if (res < 0 || ferror(file)) {
             printf("ERROR: writing to file failed\n");
             fclose(file);
             return -1;
